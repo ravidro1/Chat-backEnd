@@ -34,15 +34,17 @@ exports.login = (req, res) => {
               res.status(400).json({message: "Password incorrect"});
             } else {
               if (user.loggedIn) {
-                res.status(200).json({message: "User Already Logged!!!", userAlreadyLogged: true});
+                res.status(200).json({
+                  message: "User Already Logged!!!",
+                  userAlreadyLogged: true,
+                });
                 return;
               }
 
               user.loggedIn = true;
               user
                 .save()
-                .then((user) => {
-                })
+                .then((user) => {})
                 .catch((err) => {
                   res.status(500).json({message: "Error", err: err});
                 });
@@ -53,9 +55,12 @@ exports.login = (req, res) => {
               );
               console.log({message: "User Login | Controller"});
 
-              res
-                .status(200)
-                .json({message: "Login", userID: user._id, token: token, userAlreadyLogged: false});
+              res.status(200).json({
+                message: "Login",
+                userID: user._id,
+                token: token,
+                userAlreadyLogged: false,
+              });
             }
           })
           .catch((err) => {
@@ -160,9 +165,18 @@ exports.getAllRooms = (req, res) => {
         if (!rooms) {
           res.status(400).json({message: "Rooms List Empty"});
         } else {
-          res
-            .status(200)
-            .json({message: "Room List", rooms: rooms.previousRooms});
+          const newRoomsArray = rooms.previousRooms.map((room) => {
+            const unreadMessagesItem = user.unreadMessages.find((item) => {
+              return item.roomID.toString() == room._id.toString();
+            });
+
+            return {
+              ...room.toObject(),
+              numberOfUnreadMessages: unreadMessagesItem.numberOfUnreadMessages,
+            };
+          });
+
+          res.status(200).json({message: "Room List", rooms: newRoomsArray});
         }
       });
     }
@@ -197,10 +211,10 @@ exports.getAllUserMessages = (req, res) => {
         user
           .populate("previousMessages")
           .then((messages) => {
-            console.log(
-              messages.previousMessages[0].creationTime.getTime(),
-              "1"
-            );
+            // console.log(
+            //   messages.previousMessages[0].creationTime.getTime(),
+            //   "1"
+            // );
             if (!messages) {
               res.status(400).json({message: "Message list Empty"});
             } else {
@@ -319,3 +333,37 @@ exports.getAllUserMessages = (req, res) => {
 //       res.status(500).json({message: err});
 //     });
 // };
+
+exports.updateUnreadMessage = (req, res) => {
+  User.findById(req.body.id)
+    .then((user) => {
+      if (!user) res.status(400).json({message: "User Not Found"});
+      else {
+        const unreadMessagesIndex = user.unreadMessages.findIndex(
+          (item) => item.roomID == req.body.roomID
+        );
+
+        console.log(unreadMessagesIndex);
+
+        if (unreadMessagesIndex >= 0) {
+          user.unreadMessages[unreadMessagesIndex] = {
+            roomID: user.unreadMessages[unreadMessagesIndex].roomID,
+            numberOfUnreadMessages: req.body.newUnreadMessagesNumber,
+          };
+          console.log("user");
+
+          user
+            .save()
+            .then()
+            .catch((err) => {
+              res.status(500).json({message: "Error", err});
+            });
+        }
+
+        res.status(200).json({message: "Successful - UnreadMessage Update"});
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({message: "Error", err});
+    });
+};

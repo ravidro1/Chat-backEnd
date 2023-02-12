@@ -5,6 +5,7 @@ const Room = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    maxlength: 10,
   },
   participants: [{type: mongoose.Types.ObjectId, ref: "User", required: true}],
   creationTime: {type: Date, required: true},

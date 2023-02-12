@@ -27,13 +27,18 @@ app.use(express.json());
 
 app.post("/SignUp", UserController.signup);
 app.post("/Login", UserController.login);
-app.post("/LoginVerifyAndCheckIfUserAlreadyLogged", UserController.loginVerifyAndCheckIfUserAlreadyLogged);
+app.post(
+  "/LoginVerifyAndCheckIfUserAlreadyLogged",
+  UserController.loginVerifyAndCheckIfUserAlreadyLogged
+);
 app.post("/Logout", UserController.logout);
 
 app.post("/GetAllUsers", UserController.getAllUsers);
 app.post("/GetAllUserMessages", UserController.getAllUserMessages);
 app.post("/GetAllRooms", UserController.getAllRooms);
 app.post("/GetOneUser", UserController.getOneUser);
+
+app.post("/UpdateUnreadMessage", UserController.updateUnreadMessage);
 
 // app.post("/CheckUserAlreadyLogged", UserController.checkUserAlreadyLogged);
 // app.post("/AddMessage", UserController.addMessage);

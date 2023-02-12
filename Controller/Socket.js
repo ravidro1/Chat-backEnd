@@ -2,8 +2,6 @@ const Message = require("../Models/Message");
 const Room = require("../Models/Room");
 const User = require("../models/User");
 
-const roomsList = [];
-
 exports.Socket = () => {
   const io = require("socket.io")(8002, {
     cors: "http://localhost:3000/",
@@ -24,6 +22,7 @@ exports.Socket = () => {
 
     socket.on("createRoom", (room, callBack) => {
       addRoom(room, callBack, socket);
+      // console.log(socket.rooms);
     });
 
     socket.on("transmit-IsTyping", (from, isTyping, room) => {
@@ -56,23 +55,51 @@ const addMessage = (newMessage, callBack, socket) => {
           .then((room) => {
             room.populate("participants").then((users) => {
               users.participants.map((user) => {
+                socket.to(user._id.toString()).emit("recive-message", {
+                  ...newMessage,
+                  creationTime: currentName,
+                  _id: message._id,
+                });
+
+                if (user.username != message.from) {
+                  const unreadItemIndex = user.unreadMessages.findIndex(
+                    (item) =>
+                      item.roomID?.toString() == message.room?.toString()
+                  );
+
+                  if (unreadItemIndex >= 0) {
+                    // console.log(unreadItemIndex);
+
+                    user.unreadMessages[unreadItemIndex] = {
+                      roomID: user.unreadMessages[unreadItemIndex].roomID,
+                      numberOfUnreadMessages:
+                        user.unreadMessages[unreadItemIndex]
+                          .numberOfUnreadMessages + 1,
+                    };
+                  } else {
+                    user.unreadMessages.push({
+                      numberOfUnreadMessages: 1,
+                      roomID: message.room,
+                    });
+                  }
+                }
+
                 user.previousMessages.push(message._id);
-                user.save().catch((err) => console.log({message: err}));
+                user
+                  .save()
+                  .then()
+                  .catch((err) => console.log({message: "Error", err}));
               });
 
-              console.log({message: "Message Sent", participants: users});
+              // console.log({message: "Message Sent", participants: users});
+              console.log({message: "Message Sent"});
             });
           })
           .catch((err) => {
-            console.log(err);
+            console.log({message: "Error", err});
           });
 
         callBack(message._id, currentName);
-        socket.broadcast.emit("recive-message", {
-          ...newMessage,
-          creationTime: currentName,
-          _id: message._id,
-        });
       }
     })
     .catch((err) => {
@@ -92,7 +119,11 @@ const addRoom = (newRoomData, callBack, socket) => {
           .populate("participants")
           .then((participants) => {
             participants?.participants?.map((user) => {
+              socket.to(user._id.toString()).emit("recive-newRoom", room);
               user.previousRooms.push(room._id);
+
+              user.unreadMessages.push({roomID: room._id});
+              console.log(user);
               user
                 .save()
                 .then((user) => {
@@ -111,11 +142,10 @@ const addRoom = (newRoomData, callBack, socket) => {
           });
         console.log({message: "Room Created"});
 
-        console.log(newRoomData);
-        console.log(room);
+        // console.log(newRoomData);
+        // console.log(room);
 
         callBack(room);
-        socket.broadcast.emit("recive-newRoom", room);
       }
     })
     .catch((err) => {

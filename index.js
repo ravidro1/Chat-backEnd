@@ -5,12 +5,13 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
-const port = 8001;
 require("dotenv").config();
+
+const port = process.env.PORT || 8000;
 
 mongoose
   .connect(
-    "mongodb+srv://q:q@cluster0.cuw4ebp.mongodb.net/?retryWrites=true&w=majority",
+    `mongodb+srv://${process.env.MONGOOSE_USERNAME}:${process.env.MONGOOSE_PASSWORD}@cluster0.cuw4ebp.mongodb.net/?retryWrites=true&w=majority`,
     {}
   )
   .then(() => {
@@ -22,7 +23,8 @@ mongoose
 
 const UserController = require("./Controller/UserController");
 
-app.use(cors());
+app.use(cors(["http://localhost:3000/", process.env.FRONTEND_URL]));
+
 app.use(express.json());
 
 app.post("/SignUp", UserController.signup);
@@ -46,3 +48,7 @@ app.post("/UpdateUnreadMessage", UserController.updateUnreadMessage);
 // app.post("/GetAllUserRoomMessage", UserController.getAllUserRoomMessage);
 
 app.listen(port, () => console.log(`listening on port ${port}!`));
+
+app.use((req, res) => {
+  res.send("RaviChat Server");
+});

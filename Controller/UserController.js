@@ -167,6 +167,7 @@ exports.getAllRooms = (req, res) => {
         } else {
           const newRoomsArray = rooms.previousRooms.map((room) => {
             const unreadMessagesItem = user.unreadMessages.find((item) => {
+              console.log(item);
               return item.roomID.toString() == room._id.toString();
             });
 
@@ -175,6 +176,7 @@ exports.getAllRooms = (req, res) => {
               numberOfUnreadMessages: unreadMessagesItem.numberOfUnreadMessages,
             };
           });
+
 
           res.status(200).json({message: "Room List", rooms: newRoomsArray});
         }

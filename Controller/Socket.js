@@ -3,8 +3,8 @@ const Room = require("../Models/Room");
 const User = require("../models/User");
 
 exports.Socket = () => {
-  const io = require("socket.io")(8002, {
-    cors: "http://localhost:3000/",
+  const io = require("socket.io")(process.env.PORT || 8001, {
+    cors: ["http://localhost:3000/", process.env.FRONTEND_URL],
   });
 
   io.on("connection", (socket) => {

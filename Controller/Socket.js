@@ -2,10 +2,14 @@ const Message = require("../Models/Message");
 const Room = require("../Models/Room");
 const User = require("../models/User");
 
+require("dotenv").config();
+
 exports.Socket = () => {
   const io = require("socket.io")(process.env.PORT || 8001, {
     cors: ["http://localhost:3000/", process.env.FRONTEND_URL],
   });
+
+  console.log(process.env.FRONTEND_URL);
 
   io.on("connection", (socket) => {
     socket.on("id", (id) => {

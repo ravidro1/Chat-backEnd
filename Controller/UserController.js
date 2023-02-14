@@ -22,6 +22,8 @@ exports.signup = async (req, res) => {
 };
 
 exports.login = (req, res) => {
+  console.log("6");
+
   User.findOne({username: req.body.username})
     .then((user) => {
       if (!user) {

@@ -1,6 +1,6 @@
 const Message = require("../Models/Message");
 const Room = require("../Models/Room");
-const User = require("../models/User");
+const User = require("../Models/User");
 
 // const {io} = require("../index")
 

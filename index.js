@@ -1,25 +1,22 @@
 const {Socket} = require("./Controller/Socket");
-Socket();
+
+require("dotenv").config();
 
 const cors = require("cors");
 const mongoose = require("mongoose");
 const express = require("express");
-const app = express();
-require("dotenv").config();
+// const app = express();
 
 const port = process.env.PORT || 8000;
 
-mongoose
-  .connect(
-    `mongodb+srv://${process.env.MONGOOSE_USERNAME}:${process.env.MONGOOSE_PASSWORD}@cluster0.cuw4ebp.mongodb.net/?retryWrites=true&w=majority`,
-    {}
-  )
-  .then(() => {
-    console.log("connected");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+const app = express();
+const server = require("http").createServer(app);
+const io = require("socket.io")({
+  cors: ["http://localhost:3000/", process.env.FRONTEND_URL],
+}).listen(server);
+
+exports.io = io;
+// console.log(io);
 
 const UserController = require("./Controller/UserController");
 
@@ -47,8 +44,23 @@ app.post("/UpdateUnreadMessage", UserController.updateUnreadMessage);
 // app.post("/AddRoom", UserController.addRoom);
 // app.post("/GetAllUserRoomMessage", UserController.getAllUserRoomMessage);
 
-app.listen(port, () => console.log(`listening on port ${port}!`));
+// app.listen(port, () => console.log(`listening on port ${port}!`));
 
-app.use((req, res) => {
-  res.send("RaviChat Server");
-});
+// app.use((req, res) => {
+//   res.send("RaviChat Server");
+// });
+
+mongoose
+  .connect(
+    `mongodb+srv://${process.env.MONGOOSE_USERNAME}:${process.env.MONGOOSE_PASSWORD}@cluster0.cuw4ebp.mongodb.net/?retryWrites=true&w=majority`,
+    {}
+  )
+  .then(() => {
+    server.listen(port);
+    console.log("connected");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
+Socket(io);

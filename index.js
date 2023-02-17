@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 // const app = express();
 
-const port = process.env.PORT || 8000;
+const port = 8001 || 8002 || process.env.PORT;
 
 const app = express();
 const server = require("http").createServer(app);

@@ -7,13 +7,11 @@ const User = require("../Models/User");
 require("dotenv").config();
 
 exports.Socket = (io) => {
-  console.log(io);
-  // io
-  // const io = require("socket.io")(process.env.PORT || 8001, {
-  //   cors: ,
-  // });
+  setInterval(() => {
+    console.log("Render Interval");
+  }, 1000 * 60 * 30);
 
-  // console.log(process.env.FRONTEND_URL);
+
 
   io.on("connection", (socket) => {
     socket.on("id", (id) => {

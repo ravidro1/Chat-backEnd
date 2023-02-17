@@ -11,19 +11,7 @@ const User = new mongoose.Schema({
     required: true,
   },
 
-  
   previousRooms: [{type: mongoose.Types.ObjectId, ref: "Room"}],
-
-
-
-
-
-
-
-
-
-
-
 
   previousMessages: [{type: mongoose.Types.ObjectId, ref: "Message"}],
 

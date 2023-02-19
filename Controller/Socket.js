@@ -153,7 +153,7 @@ const addRoom = (newRoomData, callBack, socket) => {
               user.previousRooms.push(room._id);
 
               user.unreadMessages.push({roomID: room._id});
-              console.log(user);
+              // console.log(user);
               user
                 .save()
                 .then((user) => {

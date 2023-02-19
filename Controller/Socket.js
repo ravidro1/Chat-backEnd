@@ -2,6 +2,8 @@ const Message = require("../Models/Message");
 const Room = require("../Models/Room");
 const User = require("../Models/User");
 
+const bcrypt = require("bcrypt");
+
 // const {io} = require("../index")
 
 require("dotenv").config();
@@ -11,8 +13,6 @@ exports.Socket = (io) => {
     console.log("Render Interval");
   }, 1000 * 60 * 30);
 
-
-
   io.on("connection", (socket) => {
     socket.on("id", (id) => {
       login(id);
@@ -20,6 +20,10 @@ exports.Socket = (io) => {
         logout(id);
         console.log("disconnect");
       });
+    });
+
+    socket.on("signup", (username, password, callBack) => {
+      signup(username, password, callBack, socket);
     });
 
     socket.on("newMessage", (newMessage, callBack) => {
@@ -45,6 +49,26 @@ exports.Socket = (io) => {
       callBack(room);
     });
   });
+};
+
+const signup = async (username, password, callBack, socket) => {
+  const hashPassword = await bcrypt.hash(password, 10);
+  const newUser = new User({username: username, password: hashPassword});
+  newUser
+    .save()
+    .then((user) => {
+      if (!user) {
+        console.log({message: "User creation falild"});
+      } else {
+        callBack();
+        socket.broadcast.emit("receive-signup", user);
+
+        console.log({message: "User created"});
+      }
+    })
+    .catch((err) => {
+      console.log({message: "Error", err: err});
+    });
 };
 
 const addMessage = (newMessage, callBack, socket) => {

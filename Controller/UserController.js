@@ -4,22 +4,22 @@ const bcrypt = require("bcrypt");
 const Message = require("../Models/Message");
 const Room = require("../Models/Room");
 
-exports.signup = async (req, res) => {
-  const hashPassword = await bcrypt.hash(req.body.password, 10);
-  const newUser = new User({...req.body, password: hashPassword});
-  newUser
-    .save()
-    .then((user) => {
-      if (!user) {
-        res.status(400).json({message: "User creation falild"});
-      } else {
-        res.status(200).json({message: "User created"});
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({message: "Error", err: err});
-    });
-};
+// exports.signup = async (req, res) => {
+//   const hashPassword = await bcrypt.hash(req.body.password, 10);
+//   const newUser = new User({...req.body, password: hashPassword});
+//   newUser
+//     .save()
+//     .then((user) => {
+//       if (!user) {
+//         res.status(400).json({message: "User creation falild"});
+//       } else {
+//         res.status(200).json({message: "User created"});
+//       }
+//     })
+//     .catch((err) => {
+//       res.status(500).json({message: "Error", err: err});
+//     });
+// };
 
 exports.login = (req, res) => {
   console.log("6");

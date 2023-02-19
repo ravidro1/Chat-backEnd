@@ -24,7 +24,7 @@ app.use(cors(["http://localhost:3000/", process.env.FRONTEND_URL]));
 
 app.use(express.json());
 
-app.post("/SignUp", UserController.signup);
+// app.post("/SignUp", UserController.signup);
 app.post("/Login", UserController.login);
 app.post(
   "/LoginVerifyAndCheckIfUserAlreadyLogged",
@@ -57,6 +57,7 @@ mongoose
   )
   .then(() => {
     server.listen(port);
+    console.log("Listen To Port: " + port);
     console.log("connected");
   })
   .catch((err) => {

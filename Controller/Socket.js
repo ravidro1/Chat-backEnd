@@ -1,11 +1,7 @@
 const Message = require("../Models/Message");
 const Room = require("../Models/Room");
 const User = require("../Models/User");
-
 const bcrypt = require("bcrypt");
-
-// const {io} = require("../index")
-
 require("dotenv").config();
 
 exports.Socket = (io) => {
@@ -32,19 +28,23 @@ exports.Socket = (io) => {
 
     socket.on("createRoom", (room, callBack) => {
       addRoom(room, callBack, socket);
-      // console.log(socket.rooms);
     });
 
     socket.on("transmit-IsTyping", (from, isTyping, room) => {
       socket.to(room).emit("receive-IsTyping", from, isTyping, room);
     });
 
-    socket.on("joinRoom", (room, callBack) => {
-      // const roomsArray = Array.from(socket.rooms);
-      // roomsArray.forEach((room, index) => {
-      //   if (index != 0) socket.leave(room);
-      // });
+    // socket.on("transmit-sendFriendshipRequest", (from, to, callBack) => {
+    //   socket.to(to).emit("receive-sendFriendshipRequest");
+    //   callBack()
+    // });
 
+    // socket.on("transmit-acceptFriendshipRequest", (from, to, callBack) => {
+    //   socket.to(to).emit("receive-acceptFriendshipRequest");
+    //   callBack()
+    // });
+
+    socket.on("joinRoom", (room, callBack) => {
       socket.join(room);
       callBack(room);
     });
@@ -72,9 +72,9 @@ const signup = async (username, password, callBack, socket) => {
 };
 
 const addMessage = (newMessage, callBack, socket) => {
-  const currentName = new Date();
+  const currentTime = new Date();
 
-  const createMessage = new Message({...newMessage, creationTime: currentName});
+  const createMessage = new Message({...newMessage, creationTime: currentTime});
   createMessage
     .save()
     .then((message) => {
@@ -87,7 +87,7 @@ const addMessage = (newMessage, callBack, socket) => {
               users.participants.map((user) => {
                 socket.to(user._id.toString()).emit("recive-message", {
                   ...newMessage,
-                  creationTime: currentName,
+                  creationTime: currentTime,
                   _id: message._id,
                 });
 
@@ -98,8 +98,6 @@ const addMessage = (newMessage, callBack, socket) => {
                   );
 
                   if (unreadItemIndex >= 0) {
-                    // console.log(unreadItemIndex);
-
                     user.unreadMessages[unreadItemIndex] = {
                       roomID: user.unreadMessages[unreadItemIndex].roomID,
                       numberOfUnreadMessages:
@@ -121,15 +119,25 @@ const addMessage = (newMessage, callBack, socket) => {
                   .catch((err) => console.log({message: "Error", err}));
               });
 
-              // console.log({message: "Message Sent", participants: users});
               console.log({message: "Message Sent"});
             });
+
+            room.update({lastTimeActive: currentTime}).catch((err) => {
+              console.log({
+                message: "Error - Update lastTimeActive Faild",
+                err,
+              });
+            });
+
+            // room.save().catch((err) => {
+            //   console.log({message: "Error - Save Room Faild", err});
+            // });
           })
           .catch((err) => {
             console.log({message: "Error", err});
           });
 
-        callBack(message._id, currentName);
+        callBack(message._id, currentTime);
       }
     })
     .catch((err) => {
@@ -138,7 +146,8 @@ const addMessage = (newMessage, callBack, socket) => {
 };
 
 const addRoom = (newRoomData, callBack, socket) => {
-  const newRoom = new Room(newRoomData);
+  const currentTime = new Date().getTime();
+  const newRoom = new Room({...newRoomData, lastTimeActive: currentTime});
   newRoom
     .save()
     .then((room) => {
@@ -153,7 +162,6 @@ const addRoom = (newRoomData, callBack, socket) => {
               user.previousRooms.push(room._id);
 
               user.unreadMessages.push({roomID: room._id});
-              // console.log(user);
               user
                 .save()
                 .then((user) => {
@@ -188,7 +196,6 @@ const login = (id) => {
     .then((user) => {
       if (!user) console.log({message: "User Not Found!!!"});
       else {
-        // console.log(user);
         console.log({message: "User Login | Socket"});
       }
     })
@@ -202,7 +209,6 @@ const logout = (id) => {
     .then((user) => {
       if (!user) console.log({message: "User Not Found!!!"});
       else {
-        // console.log(user);
         console.log({message: "User Logout | Socket"});
       }
     })

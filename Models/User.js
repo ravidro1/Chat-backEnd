@@ -11,6 +11,17 @@ const User = new mongoose.Schema({
     required: true,
   },
 
+  FriendRequestsSentFromUserInPending: [{
+    to: {},
+    time: {}
+  }],
+  FriendRequestsSentToUserInPending: [{
+    from: {},
+    time: {}
+  }],
+
+  friendsList: [{type: mongoose.Types.ObjectId, ref: "User"}],
+
   previousRooms: [{type: mongoose.Types.ObjectId, ref: "Room"}],
 
   previousMessages: [{type: mongoose.Types.ObjectId, ref: "Message"}],

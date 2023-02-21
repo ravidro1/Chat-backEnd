@@ -4,26 +4,7 @@ const bcrypt = require("bcrypt");
 const Message = require("../Models/Message");
 const Room = require("../Models/Room");
 
-// exports.signup = async (req, res) => {
-//   const hashPassword = await bcrypt.hash(req.body.password, 10);
-//   const newUser = new User({...req.body, password: hashPassword});
-//   newUser
-//     .save()
-//     .then((user) => {
-//       if (!user) {
-//         res.status(400).json({message: "User creation falild"});
-//       } else {
-//         res.status(200).json({message: "User created"});
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).json({message: "Error", err: err});
-//     });
-// };
-
 exports.login = (req, res) => {
-  console.log("6");
-
   User.findOne({username: req.body.username})
     .then((user) => {
       if (!user) {
@@ -108,7 +89,6 @@ exports.logout = (req, res) => {
     .then((user) => {
       if (!user) res.status(400).json({message: "User Not Found!!!"});
       else {
-        // console.log(user);
         res.status(200).json({message: "User Logout"});
       }
     })
@@ -116,22 +96,6 @@ exports.logout = (req, res) => {
       res.status(500).json({message: "Error", err});
     });
 };
-
-// exports.checkUserAlreadyLogged = (req, res) => {
-//   User.findById(req.body.id)
-//     .then((user) => {
-//       if (!user) {
-//         res.status(400).json({message: "User Not Found"});
-//       } else {
-//         res
-//           .status(200)
-//           .json({message: "User Found", isAlreadyLogged: user.loggedIn});
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(200).json({message: "Error", err});
-//     });
-// };
 
 exports.getOneUser = (req, res) => {
   User.findOne({_id: req.body.id})
@@ -179,7 +143,6 @@ exports.getAllRooms = (req, res) => {
             };
           });
 
-
           res.status(200).json({message: "Room List", rooms: newRoomsArray});
         }
       });
@@ -206,7 +169,6 @@ exports.getAllRoomUsers = (req, res) => {
 };
 
 exports.getAllUserMessages = (req, res) => {
-  // User.findOne({username: req.body.username})
   User.findOne({_id: req.body.id})
     .then((user) => {
       if (!user) {
@@ -215,10 +177,6 @@ exports.getAllUserMessages = (req, res) => {
         user
           .populate("previousMessages")
           .then((messages) => {
-            // console.log(
-            //   messages.previousMessages[0].creationTime.getTime(),
-            //   "1"
-            // );
             if (!messages) {
               res.status(400).json({message: "Message list Empty"});
             } else {
@@ -237,106 +195,6 @@ exports.getAllUserMessages = (req, res) => {
       res.status(500).json({message: "Error", err});
     });
 };
-
-// exports.getAllUserRoomMessage = (req, res) => {
-//   // User.findOne({username: req.body.username})
-//   User.findOne({_id: req.body.id})
-//     .then((user) => {
-//       if (!user) {
-//         res.status(400).json({message: "User Not Found"});
-//       } else {
-//         user
-//           .populate("previousMessages")
-//           .then((messages) => {
-//             if (!messages) {
-//               res.status(400).json({message: "Message list Empty"});
-//             } else {
-//               const messageList = messages.previousMessages.filter(
-//                 (message) => message.room == req.body.room
-//               );
-//               res.status(200).json({
-//                 message: "Message list",
-//                 data: messageList,
-//               });
-//             }
-//           })
-//           .catch((err) => {
-//             res.status(500).json({message: err});
-//           });
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).json({message: "Error", err});
-//     });
-// };
-
-// exports.addRoom = (req, res) => {
-//   const newRoom = new Room(req.body);
-//   newRoom
-//     .save()
-//     .then((room) => {
-//       if (!room) {
-//         res.status(400).json({message: "Room Not Created"});
-//       } else {
-//         room
-//           .populate("participants")
-//           .then((participants) => {
-//             participants?.participants?.map((user) => {
-//               user.previousRooms.push(room._id);
-//               user
-//                 .save()
-//                 .then((user) => {
-//                   if (!user) res.status(400).json({message: "User Not Found"});
-//                   else console.log("add to " + user.username);
-//                 })
-//                 .catch((err) => {
-//                   res.status(500).json({message: "Error", err});
-//                 });
-//             });
-//           })
-//           .catch((err) => {
-//             res.status(500).json({message: err});
-//           });
-//         res.status(200).json({message: "Room Created"});
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).json({message: "Error", err});
-//     });
-// };
-
-// exports.addMessage = (req, res) => {
-//   const newMessage = new Message(req.body);
-//   newMessage
-//     .save()
-//     .then((message) => {
-//       if (!message) {
-//         res.status(400).json({message: "Message Not Created"});
-//       } else {
-//         Room.findOne({_id: message.room})
-//           .then((room) => {
-//             room.populate("participants").then((users) => {
-//               users.participants.map((user) => {
-//                 user.previousMessages.push(message._id);
-//                 user
-//                   .save()
-//                   .catch((err) => res.status(500).json({message: err}));
-//               });
-
-//               res
-//                 .status(200)
-//                 .json({message: "Message Sent", participants: users});
-//             });
-//           })
-//           .catch((err) => {
-//             console.log(err);
-//           });
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).json({message: err});
-//     });
-// };
 
 exports.updateUnreadMessage = (req, res) => {
   User.findById(req.body.id)
@@ -365,6 +223,24 @@ exports.updateUnreadMessage = (req, res) => {
         }
 
         res.status(200).json({message: "Successful - UnreadMessage Update"});
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({message: "Error", err});
+    });
+};
+
+exports.getAllFriendsList = (req, res) => {
+  User.findById(req.body.user_id)
+    .then((user) => {
+      if (!user) res.status(400).json({message: "User Not Found"});
+      else {
+        user.populate("friendsList").then((populateUser) => {
+          res.status(200).json({
+            message: "Successful - Friends List",
+            friendsList: populateUser.friendsList,
+          });
+        });
       }
     })
     .catch((err) => {

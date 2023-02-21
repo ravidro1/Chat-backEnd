@@ -11,6 +11,8 @@ const Room = new mongoose.Schema({
   creationTime: {type: Date, required: true},
   creator: {type: String, required: true},
 
+  lastTimeActive: {type: Date, required: true},
+
   //  isPrivate: {type: Boolean, required: true},
 });
 

@@ -5,7 +5,6 @@ require("dotenv").config();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const express = require("express");
-// const app = express();
 
 const port = 8001 || 8002 || process.env.PORT;
 
@@ -16,7 +15,6 @@ const io = require("socket.io")({
 }).listen(server);
 
 exports.io = io;
-// console.log(io);
 
 const UserController = require("./Controller/UserController");
 
@@ -24,7 +22,6 @@ app.use(cors(["http://localhost:3000/", process.env.FRONTEND_URL]));
 
 app.use(express.json());
 
-// app.post("/SignUp", UserController.signup);
 app.post("/Login", UserController.login);
 app.post(
   "/LoginVerifyAndCheckIfUserAlreadyLogged",

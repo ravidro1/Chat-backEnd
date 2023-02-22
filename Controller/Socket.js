@@ -128,10 +128,6 @@ const addMessage = (newMessage, callBack, socket) => {
                 err,
               });
             });
-
-            // room.save().catch((err) => {
-            //   console.log({message: "Error - Save Room Faild", err});
-            // });
           })
           .catch((err) => {
             console.log({message: "Error", err});

@@ -34,21 +34,205 @@ exports.Socket = (io) => {
       socket.to(room).emit("receive-IsTyping", from, isTyping, room);
     });
 
-    // socket.on("transmit-sendFriendshipRequest", (from, to, callBack) => {
-    //   socket.to(to).emit("receive-sendFriendshipRequest");
-    //   callBack()
-    // });
+    socket.on("transmit-sendFriendshipRequest", (from, to, callBack) => {
+      addFriendshipRequest(callBack, socket, to, from);
+    });
 
-    // socket.on("transmit-acceptFriendshipRequest", (from, to, callBack) => {
-    //   socket.to(to).emit("receive-acceptFriendshipRequest");
-    //   callBack()
-    // });
+    socket.on(
+      "transmit-acceptFriendshipRequest",
+      (isConfirmOrDeny, from, to, callBack) => {
+        if (isConfirmOrDeny)
+          confirmRequest(callBack, socket, to, from, isConfirmOrDeny);
+        else denyRequest(callBack, socket, to, from, isConfirmOrDeny);
+      }
+    );
 
     socket.on("joinRoom", (room, callBack) => {
       socket.join(room);
       callBack(room);
     });
   });
+};
+
+const addFriendshipRequest = (callBack, socket, to, from) => {
+  User.findById(to)
+    .then((user) => {
+      if (!user) {
+        console.log("Find User Faild");
+      } else {
+        if (
+          !user.FriendRequestsSentToUserInPending.includes(from) ||
+          !user.FriendRequestsSentFromUserInPending.includes(from)
+        ) {
+          const newFriendRequestsSentToUserInPending = [
+            ...user.FriendRequestsSentToUserInPending,
+          ];
+
+          newFriendRequestsSentToUserInPending.push(from);
+
+          user
+            .update({
+              FriendRequestsSentToUserInPending:
+                newFriendRequestsSentToUserInPending,
+              FriendRequestsUserSentThatDeny:
+                user.FriendRequestsUserSentThatDeny.filter(
+                  (item) => item != from
+                ),
+            })
+            .then((user) => {
+              socket.to(to).emit("receive-sendFriendshipRequest", from);
+            })
+            .catch((err) => {
+              console.log({message: "Error", err: err});
+            });
+        }
+      }
+    })
+    .catch((err) => {
+      console.log({message: "Error", err: err});
+    });
+
+  User.findById(from)
+    .then((user) => {
+      if (!user) {
+        console.log("Find User Faild");
+      } else {
+        if (
+          !user.FriendRequestsSentFromUserInPending.includes(to) ||
+          !user.FriendRequestsSentToUserInPending.includes(to)
+        ) {
+          const newFriendRequestsSentFromUserInPending = [
+            ...user.FriendRequestsSentFromUserInPending,
+          ];
+
+          newFriendRequestsSentFromUserInPending.push(to);
+          user
+            .update({
+              FriendRequestsSentFromUserInPending:
+                newFriendRequestsSentFromUserInPending,
+              FriendRequestsUserSentThatDeny:
+                user.FriendRequestsUserSentThatDeny.filter(
+                  (item) => item != to
+                ),
+            })
+            .then((user) => {
+              callBack(to);
+            })
+            .catch((err) => {
+              console.log({message: "Error", err: err});
+            });
+        }
+      }
+    })
+    .catch((err) => {
+      console.log({message: "Error", err: err});
+    });
+};
+
+const confirmRequest = (callBack, socket, to, from, isConfirmOrDeny) => {
+  User.findById(to)
+    .then((user) => {
+      if (!user) {
+        console.log("User Not Found");
+      } else {
+        user
+          .update({
+            friendsList: [...user.friendsList, from],
+            FriendRequestsSentFromUserInPending:
+              user.FriendRequestsSentFromUserInPending.filter(
+                (item) => item.toString() != from
+              ),
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        socket
+          .to(to)
+          .emit("receive-acceptFriendshipRequest", from, isConfirmOrDeny);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  User.findById(from)
+    .then((user) => {
+      if (!user) {
+        console.log("User Not Found");
+      } else {
+        user
+          .update({
+            friendsList: [...user.friendsList, to],
+            FriendRequestsSentToUserInPending:
+              user.FriendRequestsSentToUserInPending.filter(
+                (item) => item.toString() != to
+              ),
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        callBack();
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+const denyRequest = (callBack, socket, to, from, isConfirmOrDeny) => {
+  User.findById(to)
+    .then((user) => {
+      if (!user) {
+        console.log("User Not Found");
+      } else {
+        user
+          .update({
+            FriendRequestsUserSentThatDeny: [
+              ...user.FriendRequestsUserSentThatDeny,
+              from,
+            ],
+            FriendRequestsSentFromUserInPending:
+              user.FriendRequestsSentFromUserInPending.filter(
+                (item) => item.toString() != from
+              ),
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        socket
+          .to(to)
+          .emit("receive-acceptFriendshipRequest", from, isConfirmOrDeny);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  User.findById(from)
+    .then((user) => {
+      if (!user) {
+        console.log("User Not Found");
+      } else {
+        user
+          .update({
+            FriendRequestsSentToUserInPending:
+              user.FriendRequestsSentToUserInPending.filter(
+                (item) => item.toString() != to
+              ),
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        callBack();
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 const signup = async (username, password, callBack, socket) => {

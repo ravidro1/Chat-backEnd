@@ -11,14 +11,16 @@ const User = new mongoose.Schema({
     required: true,
   },
 
-  FriendRequestsSentFromUserInPending: [{
-    to: {},
-    time: {}
-  }],
-  FriendRequestsSentToUserInPending: [{
-    from: {},
-    time: {}
-  }],
+  FriendRequestsUserSentThatDeny: [
+    {type: mongoose.Types.ObjectId, ref: "User"},
+  ],
+
+  FriendRequestsSentFromUserInPending: [
+    {type: mongoose.Types.ObjectId, ref: "User"},
+  ],
+  FriendRequestsSentToUserInPending: [
+    {type: mongoose.Types.ObjectId, ref: "User"},
+  ],
 
   friendsList: [{type: mongoose.Types.ObjectId, ref: "User"}],
 

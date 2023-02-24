@@ -33,6 +33,7 @@ app.post("/GetAllUsers", UserController.getAllUsers);
 app.post("/GetAllUserMessages", UserController.getAllUserMessages);
 app.post("/GetAllRooms", UserController.getAllRooms);
 app.post("/GetOneUser", UserController.getOneUser);
+app.post("/GetAllFriendsList", UserController.getAllFriendsList);
 
 app.post("/UpdateUnreadMessage", UserController.updateUnreadMessage);
 

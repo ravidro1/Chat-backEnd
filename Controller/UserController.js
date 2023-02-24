@@ -114,7 +114,27 @@ exports.getAllUsers = (req, res) => {
       if (!users) {
         res.status(400).json({message: "Users Not Found"});
       } else {
-        res.status(200).json({message: "Users Found", users});
+        // const populateUsersList = [];
+        // users.map((user, index) => {
+        //   user
+        //     .populate(["FriendRequestsSentFromUserInPending", "FriendRequestsSentToUserInPending"])
+        //     .then((populateUser) => {
+        //       populateUsersList.push(populateUser);
+
+        //       if (index == users.length - 1) {
+        //         console.log(populateUsersList, 5435);
+
+        //         res
+        //           .status(200)
+        //           .json({message: "Users Found", users: populateUsersList});
+        //       }
+        //     })
+        //     .catch((err) => {
+        //       res.status(500).json({message: "Error", err});
+        //     });
+        // });
+
+        res.status(200).json({message: "Users Found", users: users});
       }
     })
     .catch((err) => {
@@ -133,7 +153,7 @@ exports.getAllRooms = (req, res) => {
         } else {
           const newRoomsArray = rooms.previousRooms.map((room) => {
             const unreadMessagesItem = user.unreadMessages.find((item) => {
-              console.log(item);
+              // console.log(item);
               return item.roomID.toString() == room._id.toString();
             });
 
@@ -205,14 +225,14 @@ exports.updateUnreadMessage = (req, res) => {
           (item) => item.roomID == req.body.roomID
         );
 
-        console.log(unreadMessagesIndex);
+        // console.log(unreadMessagesIndex);
 
         if (unreadMessagesIndex >= 0) {
           user.unreadMessages[unreadMessagesIndex] = {
             roomID: user.unreadMessages[unreadMessagesIndex].roomID,
             numberOfUnreadMessages: req.body.newUnreadMessagesNumber,
           };
-          console.log("user");
+          // console.log("user");
 
           user
             .save()

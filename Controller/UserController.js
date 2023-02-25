@@ -5,16 +5,16 @@ const Message = require("../Models/Message");
 const Room = require("../Models/Room");
 
 exports.login = (req, res) => {
-  User.findOne({username: req.body.username})
+  User.findOne({ username: req.body.username })
     .then((user) => {
       if (!user) {
-        res.status(400).json({message: "User not found"});
+        res.status(400).json({ message: "User not found" });
       } else {
         bcrypt
           .compare(req.body.password, user.password)
           .then((password) => {
             if (!password) {
-              res.status(400).json({message: "Password incorrect"});
+              res.status(400).json({ message: "Password incorrect" });
             } else {
               if (user.loggedIn) {
                 res.status(200).json({
@@ -29,14 +29,14 @@ exports.login = (req, res) => {
                 .save()
                 .then((user) => {})
                 .catch((err) => {
-                  res.status(500).json({message: "Error", err: err});
+                  res.status(500).json({ message: "Error", err: err });
                 });
 
               const token = jsonwebtoken.sign(
-                {id: user._id},
+                { id: user._id },
                 process.env.JWT_TOKEN
               );
-              console.log({message: "User Login | Controller"});
+              console.log({ message: "User Login | Controller" });
 
               res.status(200).json({
                 message: "Login",
@@ -47,20 +47,20 @@ exports.login = (req, res) => {
             }
           })
           .catch((err) => {
-            res.status(500).json({message: "Error", err: err});
+            res.status(500).json({ message: "Error", err: err });
           });
       }
     })
     .catch((err) => {
-      res.status(500).json({message: "Error", err: err});
+      res.status(500).json({ message: "Error", err: err });
     });
 };
 
 exports.loginVerifyAndCheckIfUserAlreadyLogged = (req, res) => {
-  User.findOne({_id: req.body.id})
+  User.findOne({ _id: req.body.id })
     .then((user) => {
       if (!user) {
-        res.status(400).json({message: "User Not Exist"});
+        res.status(400).json({ message: "User Not Exist" });
       } else {
         const isLegalToken = jsonwebtoken.verify(
           req.body.token,
@@ -75,36 +75,36 @@ exports.loginVerifyAndCheckIfUserAlreadyLogged = (req, res) => {
         } else {
           res
             .status(400)
-            .json({message: "Token Not Legal", isLegalToken: false});
+            .json({ message: "Token Not Legal", isLegalToken: false });
         }
       }
     })
     .catch((err) => {
-      res.status(500).json({message: "Error", err, isLegalToken: false});
+      res.status(500).json({ message: "Error", err, isLegalToken: false });
     });
 };
 
 exports.logout = (req, res) => {
-  User.findOneAndUpdate({_id: req.body.id}, {loggedIn: false})
+  User.findOneAndUpdate({ _id: req.body.id }, { loggedIn: false })
     .then((user) => {
-      if (!user) res.status(400).json({message: "User Not Found!!!"});
+      if (!user) res.status(400).json({ message: "User Not Found!!!" });
       else {
-        res.status(200).json({message: "User Logout"});
+        res.status(200).json({ message: "User Logout" });
       }
     })
     .catch((err) => {
-      res.status(500).json({message: "Error", err});
+      res.status(500).json({ message: "Error", err });
     });
 };
 
 exports.getOneUser = (req, res) => {
-  User.findOne({_id: req.body.id})
+  User.findOne({ _id: req.body.id })
     .then((user) => {
-      if (!user) res.status(400).json({message: "User Not Exist!!!"});
-      else res.status(200).json({message: "User Found", user});
+      if (!user) res.status(400).json({ message: "User Not Exist!!!" });
+      else res.status(200).json({ message: "User Found", user });
     })
     .catch((err) => {
-      res.status(500).json({message: "Error", err});
+      res.status(500).json({ message: "Error", err });
     });
 };
 
@@ -112,7 +112,7 @@ exports.getAllUsers = (req, res) => {
   User.find({})
     .then((users) => {
       if (!users) {
-        res.status(400).json({message: "Users Not Found"});
+        res.status(400).json({ message: "Users Not Found" });
       } else {
         // const populateUsersList = [];
         // users.map((user, index) => {
@@ -134,22 +134,22 @@ exports.getAllUsers = (req, res) => {
         //     });
         // });
 
-        res.status(200).json({message: "Users Found", users: users});
+        res.status(200).json({ message: "Users Found", users: users });
       }
     })
     .catch((err) => {
-      res.status(500).json({message: "Error", err});
+      res.status(500).json({ message: "Error", err });
     });
 };
 
 exports.getAllRooms = (req, res) => {
-  User.findOne({_id: req.body.id}).then((user) => {
+  User.findOne({ _id: req.body.id }).then((user) => {
     if (!user) {
-      res.status(400).json({message: "User Not Found"});
+      res.status(400).json({ message: "User Not Found" });
     } else {
       user.populate("previousRooms").then((rooms) => {
         if (!rooms) {
-          res.status(400).json({message: "Rooms List Empty"});
+          res.status(400).json({ message: "Rooms List Empty" });
         } else {
           const newRoomsArray = rooms.previousRooms.map((room) => {
             const unreadMessagesItem = user.unreadMessages.find((item) => {
@@ -163,7 +163,7 @@ exports.getAllRooms = (req, res) => {
             };
           });
 
-          res.status(200).json({message: "Room List", rooms: newRoomsArray});
+          res.status(200).json({ message: "Room List", rooms: newRoomsArray });
         }
       });
     }
@@ -171,17 +171,17 @@ exports.getAllRooms = (req, res) => {
 };
 
 exports.getAllRoomUsers = (req, res) => {
-  Room.findOne({_id: req.body.id}).then((room) => {
+  Room.findOne({ _id: req.body.id }).then((room) => {
     if (!room) {
-      res.status(400).json({message: "Room Not Found"});
+      res.status(400).json({ message: "Room Not Found" });
     } else {
       room.populate("participants").then((users) => {
         if (!users) {
-          res.status(400).json({message: "users List Empty"});
+          res.status(400).json({ message: "users List Empty" });
         } else {
           res
             .status(200)
-            .json({message: "Room List", users: users.participants});
+            .json({ message: "Room List", users: users.participants });
         }
       });
     }
@@ -189,16 +189,16 @@ exports.getAllRoomUsers = (req, res) => {
 };
 
 exports.getAllUserMessages = (req, res) => {
-  User.findOne({_id: req.body.id})
+  User.findOne({ _id: req.body.id })
     .then((user) => {
       if (!user) {
-        res.status(400).json({message: "User Not Found"});
+        res.status(400).json({ message: "User Not Found" });
       } else {
         user
           .populate("previousMessages")
           .then((messages) => {
             if (!messages) {
-              res.status(400).json({message: "Message list Empty"});
+              res.status(400).json({ message: "Message list Empty" });
             } else {
               res.status(200).json({
                 message: "Message list",
@@ -207,19 +207,19 @@ exports.getAllUserMessages = (req, res) => {
             }
           })
           .catch((err) => {
-            res.status(500).json({message: err});
+            res.status(500).json({ message: err });
           });
       }
     })
     .catch((err) => {
-      res.status(500).json({message: "Error", err});
+      res.status(500).json({ message: "Error", err });
     });
 };
 
 exports.updateUnreadMessage = (req, res) => {
   User.findById(req.body.id)
     .then((user) => {
-      if (!user) res.status(400).json({message: "User Not Found"});
+      if (!user) res.status(400).json({ message: "User Not Found" });
       else {
         const unreadMessagesIndex = user.unreadMessages.findIndex(
           (item) => item.roomID == req.body.roomID
@@ -238,22 +238,22 @@ exports.updateUnreadMessage = (req, res) => {
             .save()
             .then()
             .catch((err) => {
-              res.status(500).json({message: "Error", err});
+              res.status(500).json({ message: "Error", err });
             });
         }
 
-        res.status(200).json({message: "Successful - UnreadMessage Update"});
+        res.status(200).json({ message: "Successful - UnreadMessage Update" });
       }
     })
     .catch((err) => {
-      res.status(500).json({message: "Error", err});
+      res.status(500).json({ message: "Error", err });
     });
 };
 
 exports.getAllFriendsList = (req, res) => {
   User.findById(req.body.user_id)
     .then((user) => {
-      if (!user) res.status(400).json({message: "User Not Found"});
+      if (!user) res.status(400).json({ message: "User Not Found" });
       else {
         user.populate("friendsList").then((populateUser) => {
           res.status(200).json({
@@ -264,6 +264,25 @@ exports.getAllFriendsList = (req, res) => {
       }
     })
     .catch((err) => {
-      res.status(500).json({message: "Error", err});
+      res.status(500).json({ message: "Error", err });
     });
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    if (req.body.password.length < 1) return;
+    const hashPassword = await bcrypt.hash(req.body.password, 10);
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(400).json({ message: "User Not Found" });
+      else {
+        user.update({ password: hashPassword }).then(() => {
+          res.status(200).json({
+            message: "Successful - Password Changed",
+          });
+        });
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error", err });
+  }
 };

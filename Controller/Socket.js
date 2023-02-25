@@ -236,6 +236,9 @@ const denyRequest = (callBack, socket, to, from, isConfirmOrDeny) => {
 };
 
 const signup = async (username, password, callBack, socket) => {
+
+  if(password.length < 1) return;
+
   const hashPassword = await bcrypt.hash(password, 10);
   const newUser = new User({username: username, password: hashPassword});
   newUser
@@ -244,7 +247,7 @@ const signup = async (username, password, callBack, socket) => {
       if (!user) {
         console.log({message: "User creation falild"});
       } else {
-        callBack();
+        callBack(false);
         socket.broadcast.emit("receive-signup", user);
 
         console.log({message: "User created"});
@@ -252,6 +255,7 @@ const signup = async (username, password, callBack, socket) => {
     })
     .catch((err) => {
       console.log({message: "Error", err: err});
+      callBack(true);
     });
 };
 

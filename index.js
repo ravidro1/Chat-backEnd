@@ -1,4 +1,4 @@
-const {Socket} = require("./Controller/Socket");
+const { Socket } = require("./Controller/Socket");
 
 require("dotenv").config();
 
@@ -11,14 +11,24 @@ const port = 8001 || 8002 || process.env.PORT;
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")({
-  cors: ["http://localhost:3000/", process.env.FRONTEND_URL],
+  cors: [
+    "http://localhost:3000/",
+    "http://localhost:3001/",
+    process.env.FRONTEND_URL,
+  ],
 }).listen(server);
 
 exports.io = io;
 
 const UserController = require("./Controller/UserController");
 
-app.use(cors(["http://localhost:3000/", process.env.FRONTEND_URL]));
+app.use(
+  cors([
+    "http://localhost:3000/",
+    "http://localhost:3001/",
+    process.env.FRONTEND_URL,
+  ])
+);
 
 app.use(express.json());
 
@@ -28,6 +38,7 @@ app.post(
   UserController.loginVerifyAndCheckIfUserAlreadyLogged
 );
 app.post("/Logout", UserController.logout);
+app.post("/ChangePassword", UserController.changePassword);
 
 app.post("/GetAllUsers", UserController.getAllUsers);
 app.post("/GetAllUserMessages", UserController.getAllUserMessages);
@@ -36,17 +47,6 @@ app.post("/GetOneUser", UserController.getOneUser);
 app.post("/GetAllFriendsList", UserController.getAllFriendsList);
 
 app.post("/UpdateUnreadMessage", UserController.updateUnreadMessage);
-
-// app.post("/CheckUserAlreadyLogged", UserController.checkUserAlreadyLogged);
-// app.post("/AddMessage", UserController.addMessage);
-// app.post("/AddRoom", UserController.addRoom);
-// app.post("/GetAllUserRoomMessage", UserController.getAllUserRoomMessage);
-
-// app.listen(port, () => console.log(`listening on port ${port}!`));
-
-// app.use((req, res) => {
-//   res.send("RaviChat Server");
-// });
 
 mongoose
   .connect(

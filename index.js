@@ -1,4 +1,4 @@
-const { Socket } = require("./Controller/Socket");
+const {Socket} = require("./Controller/Socket");
 
 require("dotenv").config();
 
